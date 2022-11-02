@@ -1,12 +1,31 @@
 import torch
 import torch.nn.functional as F
+from torchtext.legacy import data
+from torchtext.legacy import datasets
+from torchtext.vocab import Vectors, GloVe
 
 def loss_fn(y_pred, y):
     return F.cross_entropy
 
 def load_dataset():
-    # TODO
-    raise NotImplementedError
+    tokenize = lambda x: x.split()
+    TEXT = data.Field(sequential=True, tokenize=tokenize, lower=True, include_lengths=True, batch_first=True, fix_length=200)
+    LABEL = data.LabelField()
+    train_data, test_data = datasets.IMDB.splits(TEXT, LABEL)
+    TEXT.build_vocab(train_data, vectors=GloVe(name='6B', dim=300))
+    LABEL.build_vocab(train_data)
+
+    word_embeddings = TEXT.vocab.vectors
+
+    train_data, valid_data = train_data.split()
+    train_iter, valid_iter, test_iter = data.BucketIterator.splits((train_data, valid_data, test_data),
+                                                                   batch_size=32,
+                                                                   sort_key=lambda x: len(x.text),
+                                                                   repeat=False, shuffle=True)
+
+    vocab_size = len(TEXT.vocab)
+
+    return TEXT, vocab_size, word_embeddings, train_iter, valid_iter, test_iter
 
 def clip_gradient(model, clip_value):
     params = list(filter(lambda p: p.grad is not None, model.parameters()))
