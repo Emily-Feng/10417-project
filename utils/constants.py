@@ -4,8 +4,8 @@ SLASH = "/"
 # ==========================
 #  All Path constants
 # ==========================
-BASE_PROJECT_PATH = "/Users/emilyfeng/Desktop/10417/10417-project"
-BASE_DATA_PATH = BASE_PROJECT_PATH+"data"
+BASE_PROJECT_PATH = "/home/ec2-user/Deep-Learning/10417-project/"
+BASE_DATA_PATH = "/home/ec2-user/Deep-Learning/data"
 BASE_LOG_PATH = BASE_PROJECT_PATH+"saved_models/"
 
 # =====================
