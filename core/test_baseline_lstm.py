@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 import utils.constants as cs
 from sklearn import preprocessing
-from models.lstm import RecurrentNetwork
+from models.baseline_lstm import RecurrentNetwork
 from tensorflow.python.platform import gfile
 from utils import utility, os_utils, cv_utils
 from sklearn.preprocessing import OneHotEncoder
