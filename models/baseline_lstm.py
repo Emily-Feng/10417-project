@@ -1,12 +1,14 @@
 import tensorflow as tf
+# import tensas tf
+# tf.disable_v2_behavior()
 
 
 class RecurrentNetwork(object):
 
     def __init__(self, lstm_size, batch_len, output_nodes, learning_rate):
-        self.inputs_ = tf.placeholder(tf.float32, shape=[batch_len, None, 512], name='lstm_inputs')
-        self.targets_ = tf.placeholder(tf.int32, [batch_len], name='lstm_targets')
-        self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
+        self.inputs_ = tf.compat.v1.placeholder(tf.float32, shape=[batch_len, None, 512], name='lstm_inputs')
+        self.targets_ = tf.compat.v1.placeholder(tf.int32, [batch_len], name='lstm_targets')
+        self.keep_prob = tf.compat.v1.placeholder(tf.float32, name='keep_prob')
         self.learning_rate = learning_rate
         self.output_nodes = output_nodes
         self.lstm_size = lstm_size

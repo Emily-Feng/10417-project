@@ -1,11 +1,12 @@
 import tensorflow as tf
-from utils.utility import utility
+# tf.compat.v1.disable_eager_execution()
+import utility
 
 
 class ConvAutoEncoder1(object):
     def __init__(self, summary=True):
-        self.inputs_ = tf.placeholder(tf.float32, (None, 240, 240, 1), name='inputs')
-        self.targets_ = tf.placeholder(tf.float32, (None, 240, 240, 1), name='targets')
+        self.inputs_ = tf.keras.backend.placeholder(tf.float32, (None, 240, 240, 1), name='inputs')
+        self.targets_ = tf.keras.backend.placeholder(tf.float32, (None, 240, 240, 1), name='targets')
         self.nodes = []
         self.summary = summary
         self.decoded = None
@@ -14,11 +15,12 @@ class ConvAutoEncoder1(object):
         self.acc = None
 
     def build_model(self):
+        print('input shape', self.inputs.shape)
         encoded = self.encoder(self.inputs_)
         logits = self.decoder(encoded)
         self.loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=self.targets_, logits=logits)
         self.loss = tf.reduce_mean(self.loss)
-        self.opt = tf.train.AdamOptimizer(0.001).minimize(self.loss)
+        self.opt = tf.compat.v1.train.AdamOptimizer(0.001).minimize(self.loss)
         self.process_node_names()
 
     def process_node_names(self):
@@ -34,12 +36,12 @@ class ConvAutoEncoder1(object):
         # ===============================
         #             Encoder
         # ===============================
-        with tf.variable_scope('encoder'):
+        with tf.compat.v1.variable_scope('encoder'):
 
             # ===============================
             # conv1 = (?, 240, 240, 16)
             # ===============================
-            conv1 = tf.layers.conv2d(inputs_, 16, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv1")
+            conv1 = tf.keras.layers.Conv2D(inputs_, 16, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv1")
 
             # ===============================
             # inception_1 = (?, 240, 240, 64)
@@ -49,7 +51,7 @@ class ConvAutoEncoder1(object):
             # ===============================
             # maxpool1 = (?, 120, 120, 16)
             # ===============================
-            maxpool1 = tf.layers.max_pooling2d(inception_1, (2, 2), (2, 2), padding='same', name="maxpool1")
+            maxpool1 = tf.keras.layers.MaxPooling2D(inception_1, (2, 2), (2, 2), padding='same', name="maxpool1")
 
             # ===============================
             # inception_2 = (?, 120, 120, 32)
@@ -59,7 +61,7 @@ class ConvAutoEncoder1(object):
             # ===============================
             # maxpool2 = (?, 60, 60, 8)
             # ===============================
-            maxpool2 = tf.layers.max_pooling2d(inception_2, (2, 2), (2, 2), padding='same', name="maxpool2")
+            maxpool2 = tf.keras.layers.MaxPooling2D(inception_2, (2, 2), (2, 2), padding='same', name="maxpool2")
 
             # ===============================
             # conv3 = (?, 60, 60, 8)
@@ -69,12 +71,12 @@ class ConvAutoEncoder1(object):
             # ===============================
             # maxpool3 = (?, 30, 30, 8)
             # ===============================
-            maxpool3 = tf.layers.max_pooling2d(inception_3, (2, 2), (2, 2), padding='same', name="maxpool3")
+            maxpool3 = tf.keras.layers.MaxPooling2D(inception_3, (2, 2), (2, 2), padding='same', name="maxpool3")
 
             # ===========================================
             # Flattening maxpool3 and encoded = (?, 512)
             # ===========================================
-            encoded = tf.layers.dense(tf.contrib.layers.flatten(maxpool3), 512,
+            encoded = tf.keras.layers.Dense(tf.keras.layers.Flatten(maxpool3), 512, # took out contrib here
                                       activation=tf.nn.leaky_relu, name="encoded")
 
             self.nodes = [conv1.name, inception_1.name, maxpool1.name, inception_2.name,
@@ -97,12 +99,12 @@ class ConvAutoEncoder1(object):
         # ======================
         #       Decoder
         # ======================
-        with tf.variable_scope('decoder'):
+        with tf.compat.v1.variable_scope('decoder'):
 
                 # ======================
                 #  dense1 = (?, 7200)
                 # ======================
-                dense1 = tf.layers.dense(encoded, 30*30*8, activation=tf.nn.leaky_relu, name="dense1")
+                dense1 = tf.keras.layers.Dense(encoded, 30*30*8, activation=tf.nn.leaky_relu, name="dense1")
 
                 # ========================
                 # dense1 = (?, 30, 30, 8)
@@ -112,36 +114,36 @@ class ConvAutoEncoder1(object):
                 # ========================
                 #  conv4 = (?, 30, 30, 8)
                 # ========================
-                conv4 = tf.layers.conv2d(reshape1, 8, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv4")
+                conv4 = tf.keras.layers.Conv2D(reshape1, 8, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv4")
 
                 # ==============================
                 #  up_sample1 = (?, 60, 60, 8)
                 # ==============================
-                up_sample1 = tf.image.resize_nearest_neighbor(conv4, (60, 60), name="upsample1")
+                up_sample1 = tf.image.resize(conv4, (60, 60), name="upsample1")
 
                 # ==============================
                 #  conv5 = (?, 120, 120, 8)
                 # ==============================
-                conv5 = tf.layers.conv2d(up_sample1, 8, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv5")
+                conv5 = tf.keras.layers.Conv2D(up_sample1, 8, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv5")
 
                 # ==============================
                 #  upsample2 = (?, 120, 120, 8)
                 # ==============================
-                up_sample2 = tf.image.resize_nearest_neighbor(conv5, (120, 120), name="upsample2")
+                up_sample2 = tf.image.resize(conv5, (120, 120), name="upsample2")
 
                 # ==============================
                 #  conv6 = (?, 240, 240, 16)
                 # ==============================
-                conv6 = tf.layers.conv2d(up_sample2, 8, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv6")
+                conv6 = tf.keras.layers.Conv2D(up_sample2, 8, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv6")
 
                 # ==============================
                 #  up_sample3 = (?, 240, 240, 16)
                 # ==============================
-                up_sample3 = tf.image.resize_nearest_neighbor(conv6, (240, 240), name="upsample3")
+                up_sample3 = tf.image.resize(conv6, (240, 240), name="upsample3")
 
-                conv7 = tf.layers.conv2d(up_sample3, 16, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv7")
+                conv7 = tf.keras.layers.Conv2D(up_sample3, 16, (3, 3), padding='same', activation=tf.nn.leaky_relu, name="conv7")
 
-                logits = tf.layers.conv2d(conv7, 1, (3, 3), padding='same', activation=None, name="logits")
+                logits = tf.keras.layers.Conv2D(conv7, 1, (3, 3), padding='same', activation=None, name="logits")
 
                 self.decoded = tf.nn.sigmoid(logits, name='decoded')
 

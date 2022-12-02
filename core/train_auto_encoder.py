@@ -6,10 +6,10 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 import tensorflow as tf
-from utils import utility
-import utils.constants as cs
+import utility
+import constants as cs
 import matplotlib.pyplot as plt
-from utils import os_utils, cv_utils
+import os_utils, cv_utils
 from models.auto_encoder import ConvAutoEncoder1 as ConVAE
 
 
@@ -97,7 +97,7 @@ def train():
     epochs = 150  # epochs: Number of iterations for which training will be performed
     loading = False  # loading : flag for loading an already trained model
     logs_path = cs.BASE_LOG_PATH + cs.MODEL_CONV_AE_1  # logs_path : path to store checkpoint and summary events
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
     cae = ConVAE()
     cae.build_model()
     merged_summary_op = write_summaries(cae)
