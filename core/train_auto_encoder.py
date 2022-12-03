@@ -126,7 +126,7 @@ def train():
 
     for e in tqdm(range(checkpoint_number, checkpoint_number+epochs)):
         print()
-        path_generator = os_utils.iterate_data(cs.BASE_DATA_PATH+cs.DATA_BG_TRAIN_VIDEO, "mp4")
+        path_generator = os_utils.iterate_data(cs.DATA_BG_TRAIN_VIDEO, "mp4")
         batch_counter = 0
         start_time = time.time()
 

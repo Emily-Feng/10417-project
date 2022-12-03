@@ -11,10 +11,10 @@ BASE_LOG_PATH = BASE_PROJECT_PATH+"saved_models/"
 # =====================
 #  DATA Relative Path
 # =====================
-DATA_TRAIN_VIDEOS = "videos/training_data"
-DATA_TEST_VIDEOS = "videos/testing_data"
-DATA_BG_TRAIN_VIDEO = "videos/bg_train_data"
-DATA_BG_TEST_VIDEO = "videos/bg_test_data"
+DATA_TRAIN_VIDEOS = "data/videos/training_data"
+DATA_TEST_VIDEOS = "data/videos/testing_data"
+DATA_BG_TRAIN_VIDEO = "data/videos/bg_train_data"
+DATA_BG_TEST_VIDEO = "data/videos/bg_test_data"
 
 
 # ===========================

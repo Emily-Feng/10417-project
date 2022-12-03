@@ -55,6 +55,40 @@ def freeze_model(sess, logs_path, latest_checkpoint, model, pb_file_name, freeze
 
 def prepare_batch_frames(video_path):
     fg_bg = cv2.createBackgroundSubtractorMOG2()
+
+    video = imageio.get_reader(video_path, 'ffmpeg')
+    num_frames=video._meta['nframes']
+    print("number frames", num_frames)
+    frame_batch = np.zeros((240, 240))
+    frame_batch = frame_batch.reshape((1, 240, 240))
+
+    for i in range(len(video)):
+        frame = video.get_data(i)
+        edged_image = cv_utils.apply_canny(frame, 50, 150)
+        # rect_pts = detect_person(frame)
+        # fg_mask = fg_bg.apply(frame)
+        # fg_mask = fg_mask[int(rect_pts[0]): int(rect_pts[2]-120), int(rect_pts[1]): int(rect_pts[3]-50)]
+        # edged_image = edged_image[int(rect_pts[0]): int(rect_pts[2]-120), int(rect_pts[1]): int(rect_pts[3]-50)]
+        # fg_mask[fg_mask > 0] = 255.0
+        # print(fg_mask.shape)
+        # fg_mask = cv2.addWeighted(fg_mask, 1, edged_image, 1, 0)
+        # fg_mask = cv2.bitwise_and(fg_mask, edged_image)
+        # reshaped_img = cv_utils.resize(fg_mask, (240, 240))
+        # reshaped_img = reshaped_img / 255.0
+        # cv2.imshow("bg_subtraction", reshaped_img)
+        # if cv2.waitKey(25) & 0xFF == ord('q'):
+            # break
+
+        # reshaped_img = reshaped_img.reshape((1, 240, 240))
+        # frame_batch = np.vstack((frame_batch, reshaped_img))
+
+    frame_batch = frame_batch.reshape(frame_batch.shape[0], 240, 240, 1)
+    frame_batch = frame_batch[2:, :, :, :]
+
+    return frame_batch
+
+def prepare_batch_frames_old(video_path):
+    fg_bg = cv2.createBackgroundSubtractorMOG2()
     video = imageio.get_reader(video_path, 'ffmpeg')
     frame_batch = np.zeros((240, 240))
     frame_batch = frame_batch.reshape((1, 240, 240))
@@ -141,8 +175,8 @@ def load_a_frozen_model(path_to_ckpt):
     """
     detection_graph = tf.Graph()
     with detection_graph.as_default():
-        od_graph_def = tf.GraphDef()
-        with tf.gfile.GFile(path_to_ckpt, 'rb') as fid:
+        od_graph_def = tf.compat.v1.GraphDef()
+        with tf.io.gfile.GFile(path_to_ckpt, 'rb') as fid:
             serialized_graph = fid.read()
             od_graph_def.ParseFromString(serialized_graph)
             tf.import_graph_def(od_graph_def, name='')
